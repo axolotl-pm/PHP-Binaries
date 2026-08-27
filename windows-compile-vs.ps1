@@ -13,6 +13,7 @@ $LIBYAML_VER="0.2.5"
 $PTHREAD_W32_VER="3.0.0"
 $LEVELDB_MCPE_VER="1c7564468b41610da4f498430e795ca4de0931ff" #release not tagged
 $LIBDEFLATE_VER="96836d7d9d10e3e0d53e6edb54eb908514e336c4" #1.24 - see above note about "v" prefixes
+$LIBDATACHANNEL_VER="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
 $PHP_PMMPTHREAD_VER="6.3.0"
 $PHP_YAML_VER="2.3.0"
@@ -27,6 +28,7 @@ $PHP_XXHASH_VER="0.2.0"
 $PHP_XDEBUG_VER="3.5.0"
 $PHP_ARRAYDEBUG_VER="0.2.1"
 $PHP_ENCODING_VER="1.0.0"
+$PHP_WEBRTC_VER="a6d3063a38846ccbd65e5d65cf9e329ea4a5706b" #release not tagged
 
 $PHP_IGBINARY_VER_PHP85="3.2.17RC1"
 
@@ -307,6 +309,7 @@ function download-sdk {
     write-done
 }
 
+
 function sdk-command {
     param ([string] $command, [string] $errorMessage = "")
 
@@ -436,6 +439,33 @@ function build-libdeflate {
     Pop-Location
 }
 
+function build-libdatachannel {
+    write-library "libdatachannel" $LIBDATACHANNEL_VER
+    write-download
+    (& cmd.exe /c "git clone https://github.com/paullouisageneau/libdatachannel.git libdatachannel 2>&1") >> $log_file
+    Push-Location libdatachannel
+    write-status "preparing"
+    (& cmd.exe /c "git checkout $LIBDATACHANNEL_VER 2>&1") >> $log_file
+    (& cmd.exe /c "git submodule update --init --recursive 2>&1") >> $log_file
+
+    write-configure
+    sdk-command "cmake -G `"$CMAKE_TARGET`" -A `"$ARCH`" $CMAKE_TOOLSET_FLAG^`
+        -DCMAKE_PREFIX_PATH=`"$DEPS_DIR`"^`
+        -DCMAKE_INSTALL_PREFIX=`"$DEPS_DIR`"^`
+        -DOPENSSL_ROOT_DIR=`"$DEPS_DIR`"^`
+        -DNO_EXAMPLES=ON^`
+        -DNO_TESTS=ON^`
+        -DNO_MEDIA=ON^`
+        `"$pwd`" || exit 1"
+    write-compile
+    sdk-command "msbuild ALL_BUILD.vcxproj /p:Configuration=$MSBUILD_CONFIGURATION /m || exit 1"
+    write-install
+    sdk-command "msbuild INSTALL.vcxproj /p:Configuration=$MSBUILD_CONFIGURATION /m || exit 1"
+    Copy-Item "$MSBUILD_CONFIGURATION\datachannel.pdb" "$DEPS_DIR\bin" >> $log_file 2>&1
+    write-done
+    Pop-Location
+}
+
 function download-php {
     write-library "PHP" $PHP_VER
     write-download
@@ -477,6 +507,7 @@ function download-php-extensions {
     get-github-extension "xdebug"                $PHP_XDEBUG_VER                "xdebug"   "xdebug"
     get-github-extension "arraydebug"            $PHP_ARRAYDEBUG_VER            "pmmp"     "ext-arraydebug"
     get-github-extension "encoding"              $PHP_ENCODING_VER              "pmmp"     "ext-encoding"
+    get-github-extension "webrtc"                $PHP_WEBRTC_VER                "axolotl-pm" "ext-webrtc"
 
     write-library "php-ext crypto" $PHP_CRYPTO_VER
     write-download
@@ -510,6 +541,8 @@ build-yaml
 #these two both need zlib from the standard deps
 build-leveldb
 build-libdeflate
+
+build-libdatachannel
 
 cd $BASE_PATH >> $log_file 2>&1
 
@@ -551,6 +584,7 @@ sdk-command "configure^`
     --enable-recursionguard=shared^`
     --enable-sockets^`
     --enable-tokenizer^`
+    --enable-webrtc=shared^`
     --enable-xmlreader^`
     --enable-xmlwriter^`
     --enable-xxhash^`
@@ -564,6 +598,7 @@ sdk-command "configure^`
     --with-gmp^`
     --with-iconv^`
     --with-leveldb=shared^`
+    --with-libdatachannel=`"$DEPS_DIR`"^`
     --with-libdeflate=shared^`
     --with-libxml^`
     --with-mysqli=shared^`
@@ -627,6 +662,7 @@ append-file-utf8 "extension=php_leveldb.dll" $php_ini
 append-file-utf8 "extension=php_crypto.dll" $php_ini
 append-file-utf8 "extension=php_libdeflate.dll" $php_ini
 append-file-utf8 "extension=php_encoding.dll" $php_ini
+append-file-utf8 "extension=php_webrtc.dll" $php_ini
 append-file-utf8 "igbinary.compact_strings=0" $php_ini
 if ($PHP_VERSION_ID -lt 80500) {
     append-file-utf8 "zend_extension=php_opcache.dll" $php_ini

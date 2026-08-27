@@ -22,6 +22,7 @@ OPENSSL_VERSION="3.6.0"
 LIBZIP_VERSION="1.11.4"
 SQLITE3_VERSION="3510100" #3.51.1
 LIBDEFLATE_VERSION="c8c56a20f8f621e6a966b716b31f1dedab6a41e3" #1.25 - see above note about "v" prefixes
+LIBDATACHANNEL_VERSION="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
 EXT_PMMPTHREAD_VERSION="6.3.0"
 EXT_YAML_VERSION="2.3.0"
@@ -36,6 +37,7 @@ EXT_MORTON_VERSION="0.1.2"
 EXT_XXHASH_VERSION="0.2.0"
 EXT_ARRAYDEBUG_VERSION="0.2.1"
 EXT_ENCODING_VERSION="1.0.0"
+EXT_WEBRTC_VERSION="a6d3063a38846ccbd65e5d65cf9e329ea4a5706b" #release not tagged
 
 EXT_IGBINARY_VERSION_PHP85="3.2.17RC1"
 
@@ -1065,6 +1067,49 @@ function build_libdeflate {
 	write_done
 }
 
+function build_libdatachannel {
+	write_library libdatachannel "$LIBDATACHANNEL_VERSION"
+	local libdatachannel_dir="./libdatachannel-$LIBDATACHANNEL_VERSION"
+
+	if [ "$DO_STATIC" == "yes" ]; then
+		local CMAKE_LIBDATACHANNEL_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=OFF"
+	else
+		local CMAKE_LIBDATACHANNEL_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=ON"
+	fi
+
+	if cant_use_cache "$libdatachannel_dir"; then
+		rm -rf "$libdatachannel_dir"
+		write_download
+		#source archives don't ship the deps/ submodules, and cmake needs them unless every dep is provided as a system library
+		git clone https://github.com/paullouisageneau/libdatachannel.git "$libdatachannel_dir" >> "$DIR/install.log" 2>&1
+		cd "$libdatachannel_dir"
+		git checkout "$LIBDATACHANNEL_VERSION" >> "$DIR/install.log" 2>&1
+		git submodule update --init --recursive >> "$DIR/install.log" 2>&1
+		write_configure
+		cmake . \
+			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_LIBDIR=lib \
+			-DOPENSSL_ROOT_DIR="$INSTALL_DIR" \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_INSTALL_RPATH='$ORIGIN/../lib' \
+			$CMAKE_GLOBAL_EXTRA_FLAGS \
+			$CMAKE_LIBDATACHANNEL_EXTRA_FLAGS \
+			-DNO_EXAMPLES=ON \
+			-DNO_TESTS=ON \
+			-DNO_MEDIA=ON >> "$DIR/install.log" 2>&1
+		write_compile
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$libdatachannel_dir"
+	fi
+	write_install
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	write_done
+}
+
 cd "$LIB_BUILD_DIR"
 
 build_zlib
@@ -1087,6 +1132,7 @@ build_libxml2
 build_libzip
 build_sqlite3
 build_libdeflate
+build_libdatachannel
 
 # PECL libraries
 
@@ -1150,6 +1196,8 @@ get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
 get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "pmmp" "ext-arraydebug"
 
 get_github_extension "encoding" "$EXT_ENCODING_VERSION" "pmmp" "ext-encoding"
+
+get_github_extension "webrtc" "$EXT_WEBRTC_VERSION" "axolotl-pm" "ext-webrtc"
 
 cafile=""
 if [[ "$COMPILE_TARGET" == "mac"* ]]; then
@@ -1313,6 +1361,8 @@ $HAVE_MYSQLI \
 --enable-xxhash \
 --enable-arraydebug \
 --enable-encoding \
+--enable-webrtc \
+--with-libdatachannel="$INSTALL_DIR" \
 $HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 write_compile

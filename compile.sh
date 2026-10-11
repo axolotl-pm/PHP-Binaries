@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-PHP_VERSIONS=("8.1.34" "8.2.33" "8.3.33" "8.4.24" "8.5.9")
+PHP_VERSIONS=("8.1.34" "8.2.33" "8.3.33" "8.4.24" "8.5.9" "8.6.0RC3")
 
 #### NOTE: Tags with "v" prefixes behave weirdly in the GitHub API. They'll be stripped in some places but not others.
 #### Use commit hashes to avoid this.
@@ -24,22 +24,23 @@ SQLITE3_VERSION="3510100" #3.51.1
 LIBDEFLATE_VERSION="c8c56a20f8f621e6a966b716b31f1dedab6a41e3" #1.25 - see above note about "v" prefixes
 LIBDATACHANNEL_VERSION="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
-EXT_PMMPTHREAD_VERSION="6.3.0"
-EXT_YAML_VERSION="2.3.0"
-EXT_LEVELDB_VERSION="88071eb1b1eae96af043229104b9d813f7cbe40c" #release not tagged
-EXT_CHUNKUTILS2_VERSION="0.3.5"
-EXT_XDEBUG_VERSION="3.5.0"
+EXT_PMMPTHREAD_VERSION="1b7d46dc86d9d7607d8bfaab9ee8216d07a3923f" #release not tagged
+EXT_YAML_VERSION="a7a3b8680b8fbf0895fd63371a0ffc1305b1a5b8"
+EXT_LEVELDB_VERSION="eeca6c32d3593d51ab5cf8f5e9f91423e480cf93" #release not tagged
+EXT_CHUNKUTILS2_VERSION="52752f88f89bb5571bb24060c71500e9327a3998" #release not tagged
+EXT_XDEBUG_VERSION="3.6.0alpha1"
 EXT_IGBINARY_VERSION="3.2.16"
-EXT_CRYPTO_VERSION="999b3c7edbc7f8ca4fdeb0bb4bbae488ad0daf07" #release not tagged
-EXT_RECURSIONGUARD_VERSION="0.1.0"
-EXT_LIBDEFLATE_VERSION="0.2.1"
-EXT_MORTON_VERSION="0.1.2"
-EXT_XXHASH_VERSION="0.2.0"
-EXT_ARRAYDEBUG_VERSION="0.2.1"
-EXT_ENCODING_VERSION="1.0.0"
-EXT_WEBRTC_VERSION="0.3.0"
+EXT_CRYPTO_VERSION="3815c15ef7011362a4ebf581101885fd5deef92e" #release not tagged
+EXT_RECURSIONGUARD_VERSION="d153e2d2077e191f41b666bf6c959bc1419e4775" #release not tagged
+EXT_LIBDEFLATE_VERSION="cac07655d71ef684172b23fff6a3c7a2700492e9" #release not tagged
+EXT_MORTON_VERSION="77b882e068da28f2bd3942ebc8be6dd0fd6ad6d9" #release not tagged
+EXT_XXHASH_VERSION="cc54c57ae298bdad1779aff6ef937e161ab635cc"
+EXT_ARRAYDEBUG_VERSION="0.3.0"
+EXT_ENCODING_VERSION="44832fe58764ac0d268ed5a88ad51de2f1936abb" #release not tagged
+EXT_WEBRTC_VERSION="a4c72c4eae5522225dd8a447021f0f02f2282905" #release not tagged
 
 EXT_IGBINARY_VERSION_PHP85="3.2.17RC1"
+EXT_IGBINARY_VERSION_PHP86="2b1f5d62e3037b07c2a46499ac32091cdb41fb40"
 
 function write_out {
 	echo "[$1] $2"
@@ -307,6 +308,9 @@ write_out "opt" "Selected PHP $PHP_VERSION ($PHP_VERSION_ID)"
 
 if [ $PHP_VERSION_ID -ge 80500 ]; then
   EXT_IGBINARY_VERSION="$EXT_IGBINARY_VERSION_PHP85"
+fi
+if [ $PHP_VERSION_ID -ge 80600 ]; then
+  EXT_IGBINARY_VERSION="$EXT_IGBINARY_VERSION_PHP86"
 fi
 if [ $PHP_VERSION_ID -ge 80400 ]; then
   HAVE_OPCACHE_JIT="yes"
@@ -1165,7 +1169,7 @@ function get_pecl_extension {
 cd "$BUILD_DIR/php"
 write_out "PHP" "Downloading additional extensions..."
 
-get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
+get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "axolotl-pm" "ext-pmmpthread"
 
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
@@ -1173,29 +1177,29 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
-get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
+get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "axolotl-pm" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
-git clone https://github.com/bukka/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
+git clone https://github.com/alvin0319/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR/php/ext/crypto"
 git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
 git submodule update --init --recursive >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 write_done
 
-get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
+get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "axolotl-pm" "php-leveldb"
 
-get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
+get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "axolotl-pm" "ext-chunkutils2"
 
 get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
 
-get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
+get_github_extension "morton" "$EXT_MORTON_VERSION" "axolotl-pm" "ext-morton"
 
-get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
+get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "axolotl-pm" "ext-xxhash"
 
-get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "pmmp" "ext-arraydebug"
+get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "axolotl-pm" "ext-arraydebug"
 
-get_github_extension "encoding" "$EXT_ENCODING_VERSION" "pmmp" "ext-encoding"
+get_github_extension "encoding" "$EXT_ENCODING_VERSION" "axolotl-pm" "ext-encoding"
 
 get_github_extension "webrtc" "$EXT_WEBRTC_VERSION" "axolotl-pm" "ext-webrtc"
 
@@ -1339,7 +1343,7 @@ $HAS_DEBUG \
 --without-iconv \
 --with-pdo-sqlite \
 --with-pdo-mysql \
---with-pic \
+--enable-pic \
 --enable-phar \
 --enable-ctype \
 --enable-sockets \

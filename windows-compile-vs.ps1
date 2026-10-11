@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
 
-$PHP_VERSIONS=@("8.1.34", "8.2.33", "8.3.33", "8.4.24", "8.5.9")
+$PHP_VERSIONS=@("8.1.34", "8.2.33", "8.3.33", "8.4.24", "8.5.9", "8.6.0RC3")
 
 $PHP_SDK_VER="2.4.0"
 $ARCH="x64"
@@ -26,7 +26,7 @@ $PHP_MORTON_VER="0.1.2"
 $PHP_LIBDEFLATE_VER="0.2.1"
 $PHP_XXHASH_VER="0.2.0"
 $PHP_XDEBUG_VER="3.5.0"
-$PHP_ARRAYDEBUG_VER="0.2.1"
+$PHP_ARRAYDEBUG_VER="0.3.0"
 $PHP_ENCODING_VER="1.0.0"
 $PHP_WEBRTC_VER="0.3.0"
 
@@ -191,10 +191,14 @@ $SDL_TOOLSET_FLAG=""
 $CMAKE_TOOLSET_FLAG=""
 
 $PHP_VERSION_ID = php-version-id $PHP_VER
-if ($PHP_VERSION_ID -ge 80400) {
-    $VC_VER="vs17"
+if ($PHP_VERSION_ID -ge 80600) {
+    $VC_VER="vs18"
     $SDK_TOOLSET_FLAG=""
     $CMAKE_TOOLSET_FLAG=""
+} else if ($PHP_VERSION_ID -ge 80400) {
+    $VC_VER="vs17"
+    $SDK_TOOLSET_FLAG="-s 14.44"
+    $CMAKE_TOOLSET_FLAG="-T v143"
 } else {
     #technically it's fine to build <8.4 with vs17, but this would make the binaries ABI-incompatible with community prebuilt extensions
     $VC_VER="vs16"
@@ -505,7 +509,7 @@ function download-php-extensions {
     get-github-extension "libdeflate"            $PHP_LIBDEFLATE_VER            "pmmp"     "ext-libdeflate"
     get-github-extension "xxhash"                $PHP_XXHASH_VER                "pmmp"     "ext-xxhash"
     get-github-extension "xdebug"                $PHP_XDEBUG_VER                "xdebug"   "xdebug"
-    get-github-extension "arraydebug"            $PHP_ARRAYDEBUG_VER            "pmmp"     "ext-arraydebug"
+    get-github-extension "arraydebug"            $PHP_ARRAYDEBUG_VER            "axlotl-pm"     "ext-arraydebug"
     get-github-extension "encoding"              $PHP_ENCODING_VER              "pmmp"     "ext-encoding"
     get-github-extension "webrtc"                $PHP_WEBRTC_VER                "axolotl-pm" "ext-webrtc"
 

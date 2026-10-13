@@ -24,20 +24,20 @@ SQLITE3_VERSION="3510100" #3.51.1
 LIBDEFLATE_VERSION="c8c56a20f8f621e6a966b716b31f1dedab6a41e3" #1.25 - see above note about "v" prefixes
 LIBDATACHANNEL_VERSION="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
-EXT_PMMPTHREAD_VERSION="1b7d46dc86d9d7607d8bfaab9ee8216d07a3923f" #release not tagged
+EXT_PMMPTHREAD_VERSION="6.3.1"
 EXT_YAML_VERSION="a7a3b8680b8fbf0895fd63371a0ffc1305b1a5b8"
-EXT_LEVELDB_VERSION="eeca6c32d3593d51ab5cf8f5e9f91423e480cf93" #release not tagged
-EXT_CHUNKUTILS2_VERSION="52752f88f89bb5571bb24060c71500e9327a3998" #release not tagged
+EXT_LEVELDB_VERSION="0.3.1"
+EXT_CHUNKUTILS2_VERSION="0.3.6"
 EXT_XDEBUG_VERSION="3.6.0alpha1"
 EXT_IGBINARY_VERSION="3.2.16"
 EXT_CRYPTO_VERSION="3815c15ef7011362a4ebf581101885fd5deef92e" #release not tagged
-EXT_RECURSIONGUARD_VERSION="d153e2d2077e191f41b666bf6c959bc1419e4775" #release not tagged
-EXT_LIBDEFLATE_VERSION="cac07655d71ef684172b23fff6a3c7a2700492e9" #release not tagged
-EXT_MORTON_VERSION="77b882e068da28f2bd3942ebc8be6dd0fd6ad6d9" #release not tagged
-EXT_XXHASH_VERSION="cc54c57ae298bdad1779aff6ef937e161ab635cc"
-EXT_ARRAYDEBUG_VERSION="0.3.0"
-EXT_ENCODING_VERSION="44832fe58764ac0d268ed5a88ad51de2f1936abb" #release not tagged
-EXT_WEBRTC_VERSION="a4c72c4eae5522225dd8a447021f0f02f2282905" #release not tagged
+EXT_RECURSIONGUARD_VERSION="0.1.1"
+EXT_LIBDEFLATE_VERSION="0.2.2"
+EXT_MORTON_VERSION="0.1.3"
+EXT_XXHASH_VERSION="0.2.1"
+EXT_ARRAYDEBUG_VERSION="0.2.2"
+EXT_ENCODING_VERSION="1.0.1"
+EXT_WEBRTC_VERSION="0.3.1"
 
 EXT_IGBINARY_VERSION_PHP85="3.2.17RC1"
 EXT_IGBINARY_VERSION_PHP86="2b1f5d62e3037b07c2a46499ac32091cdb41fb40"
@@ -1191,7 +1191,7 @@ get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "axolotl-pm" "php-leveldb"
 
 get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "axolotl-pm" "ext-chunkutils2"
 
-get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
+get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "axolotl-pm" "ext-libdeflate"
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "axolotl-pm" "ext-morton"
 

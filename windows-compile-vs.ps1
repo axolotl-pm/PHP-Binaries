@@ -461,6 +461,10 @@ function build-libdatachannel {
     write-status "preparing"
     (& cmd.exe /c "git checkout $LIBDATACHANNEL_VER 2>&1") >> $log_file
     (& cmd.exe /c "git submodule update --init --recursive 2>&1") >> $log_file
+    (& cmd.exe /c "git -C deps/usrsctp apply `"$outpath\patches\usrsctp.patch`" 2>&1") >> $log_file
+    if ($LASTEXITCODE -ne 0) {
+        pm-fatal-error "Failed to apply patches\usrsctp.patch"
+    }
 
     write-configure
     sdk-command "cmake -G `"$CMAKE_TARGET`" -A `"$ARCH`" $CMAKE_TOOLSET_FLAG^`

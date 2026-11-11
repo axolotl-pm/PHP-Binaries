@@ -1086,7 +1086,8 @@ function build_libdeflate {
 
 function build_libdatachannel {
 	write_library libdatachannel "$LIBDATACHANNEL_VERSION"
-	local libdatachannel_dir="./libdatachannel-$LIBDATACHANNEL_VERSION"
+	local usrsctp_patch="$DIR/patches/usrsctp.patch"
+	local libdatachannel_dir="./libdatachannel-$LIBDATACHANNEL_VERSION-$(git hash-object "$usrsctp_patch")"
 
 	if [ "$DO_STATIC" == "yes" ]; then
 		local CMAKE_LIBDATACHANNEL_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=OFF"
@@ -1102,6 +1103,7 @@ function build_libdatachannel {
 		cd "$libdatachannel_dir"
 		git checkout "$LIBDATACHANNEL_VERSION" >> "$DIR/install.log" 2>&1
 		git submodule update --init --recursive >> "$DIR/install.log" 2>&1
+		git -C deps/usrsctp apply "$usrsctp_patch" >> "$DIR/install.log" 2>&1 || { write_error "Failed to apply $usrsctp_patch"; exit 1; }
 		write_configure
 		cmake . \
 			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \

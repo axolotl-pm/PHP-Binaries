@@ -608,6 +608,7 @@ sdk-command "configure^`
     --with-crypto=shared^`
     --with-curl^`
     --with-dom^`
+    --with-ffi^`
     --with-gd=shared^`
     --with-gmp^`
     --with-iconv^`
@@ -678,6 +679,7 @@ append-file-utf8 "extension=php_libdeflate.dll" $php_ini
 append-file-utf8 "extension=php_encoding.dll" $php_ini
 append-file-utf8 "extension=php_webrtc.dll" $php_ini
 append-file-utf8 "igbinary.compact_strings=0" $php_ini
+append-file-utf8 "ffi.enable=0 ;set to 1 to use FFI; `"preload`" does not work in threads" $php_ini
 if ($PHP_VERSION_ID -lt 80500) {
     append-file-utf8 "zend_extension=php_opcache.dll" $php_ini
 }

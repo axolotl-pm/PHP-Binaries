@@ -16,6 +16,7 @@ GMP_VERSION="6.3.0"
 CURL_VERSION="curl-8_13_0"
 
 YAML_VERSION="0.2.5"
+LIBFFI_VERSION="3.8.0"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff" #release not tagged
 LIBXML_VERSION="2.15.1"
 LIBPNG_VERSION="1.6.53"
@@ -819,6 +820,43 @@ function build_yaml {
 	write_done
 }
 
+function build_libffi {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--disable-shared --enable-static"
+	else
+		local EXTRA_FLAGS="--enable-shared --disable-static"
+	fi
+
+	write_library libffi "$LIBFFI_VERSION"
+	local libffi_dir="./libffi-$LIBFFI_VERSION"
+	if cant_use_cache "$libffi_dir"; then
+		rm -rf "$libffi_dir"
+		write_download
+		download_file "https://github.com/libffi/libffi/releases/download/v$LIBFFI_VERSION/libffi-$LIBFFI_VERSION.tar.gz" "libffi" | tar -zx >> "$DIR/install.log" 2>&1
+		cd "$libffi_dir"
+
+		write_configure
+
+		RANLIB=$RANLIB ./configure \
+		--prefix="$INSTALL_DIR" \
+		--libdir="$INSTALL_DIR/lib" \
+		--disable-multi-os-directory \
+		--disable-docs \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+
+		write_compile
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$libffi_dir"
+	fi
+	write_install
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	write_done
+}
+
 function build_leveldb {
 	write_library leveldb "$LEVELDB_VERSION"
 	local leveldb_dir="./leveldb-$LEVELDB_VERSION"
@@ -1134,6 +1172,12 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
+if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
+	build_libffi
+	HAS_FFI="--with-ffi"
+else
+	HAS_FFI="" #Android supports FFI, but it does not contain dlopen or dlsym, so most of its functionality does not work.
+fi
 build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
 	build_libpng
@@ -1328,6 +1372,7 @@ RANLIB=$RANLIB CFLAGS="-std=gnu17 $CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS
 --with-zlib \
 --with-gmp \
 --with-yaml \
+$HAS_FFI \
 --with-openssl \
 --with-zip \
 --with-libdeflate \
@@ -1449,6 +1494,9 @@ echo "error_reporting=-1" >> "$INSTALL_DIR/bin/php.ini"
 echo "display_errors=1" >> "$INSTALL_DIR/bin/php.ini"
 echo "display_startup_errors=1" >> "$INSTALL_DIR/bin/php.ini"
 echo "recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging" >> "$INSTALL_DIR/bin/php.ini"
+if [ -n "$HAS_FFI" ]; then
+	echo "ffi.enable=0 ;set to 1 to use FFI; \"preload\" does not work in threads" >> "$INSTALL_DIR/bin/php.ini"
+fi
 if [ -n "$cafile" ]; then
 	echo "openssl.cafile=$cafile" >> "$INSTALL_DIR/bin/php.ini"
 fi

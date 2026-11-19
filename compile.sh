@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-PHP_VERSIONS=("8.1.34" "8.2.33" "8.3.33" "8.4.24" "8.5.9" "8.6.0RC5")
+#### Entries may be "version@git-ref" to build from a ref instead of the php-<version> tag.
+#### 8.1 is EOL, no tag exists for the CVE-2026-109618/109619 fix
+PHP_VERSIONS=("8.1.34@1d7dec178a094e6e75b229ce22754045f8c6070a" "8.2.36" "8.3.37" "8.4.28" "8.5.13", "8.6.0")
 
 #### NOTE: Tags with "v" prefixes behave weirdly in the GitHub API. They'll be stripped in some places but not others.
 #### Use commit hashes to avoid this.
@@ -169,7 +171,7 @@ SEPARATE_SYMBOLS="no"
 
 PHP_VERSION_BASE="auto"
 
-while getopts "::t:j:sdDxfgnva:P:c:l:Jiz:" OPTION; do
+while getopts "::t:j:sdDxfgnva:P:c:l:Jiz:r:" OPTION; do
 
 	case $OPTION in
 		l)
@@ -248,6 +250,9 @@ while getopts "::t:j:sdDxfgnva:P:c:l:Jiz:" OPTION; do
 		z)
 			PHP_VERSION_BASE="$OPTARG"
 			;;
+		r)
+			PHP_GIT_REV_OVERRIDE="$OPTARG"
+			;;
 		\?)
 			write_error "Invalid option: -$OPTARG"
 			exit 1
@@ -293,7 +298,11 @@ fi
 
 for version in "${PHP_VERSIONS[@]}"; do
 	if [[ "$version" == "$PHP_VERSION_BASE."* ]]; then
-		PHP_VERSION="$version"
+		PHP_VERSION="${version%%@*}"
+		PHP_GIT_REV="php-$PHP_VERSION"
+		if [[ "$version" == *"@"* ]]; then
+			PHP_GIT_REV="${version#*@}"
+		fi
 		break
 	fi
 done
@@ -302,6 +311,14 @@ if [ "$PHP_VERSION" == "" ]; then
 	write_error "Unsupported PHP base version $PHP_VERSION_BASE"
 	write_error "Example inputs: 8.2, 8.3"
 	exit 1
+fi
+
+if [ -n "$PHP_GIT_REV_OVERRIDE" ]; then
+	PHP_GIT_REV="$PHP_GIT_REV_OVERRIDE"
+fi
+
+if [ "$PHP_GIT_REV" != "php-$PHP_VERSION" ]; then
+	write_out "WARNING" "Building PHP $PHP_VERSION from ref $PHP_GIT_REV instead of the release tag"
 fi
 
 PHP_VERSION_ID=$(php_version_id "$PHP_VERSION")
@@ -592,8 +609,8 @@ set -e
 write_library "PHP" "$PHP_VERSION"
 write_download
 
-download_github_src "php/php-src" "php-$PHP_VERSION" "php" | tar -zx >> "$DIR/install.log" 2>&1
-mv php-src-php-$PHP_VERSION php
+mkdir php
+download_github_src "php/php-src" "$PHP_GIT_REV" "php" | tar -zx --strip-components=1 -C php >> "$DIR/install.log" 2>&1
 write_done
 
 function build_zlib {

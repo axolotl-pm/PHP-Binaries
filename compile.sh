@@ -1321,6 +1321,12 @@ else
 	HAS_DEBUG="--disable-debug"
 fi
 
+if [ $PHP_VERSION_ID -ge 80600 ]; then
+	HAS_PIC="--enable-pic"
+else
+	HAS_PIC="--with-pic"
+fi
+
 if [ "$FSANITIZE_OPTIONS" != "" ]; then
 	CFLAGS="$CFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
 	CXXFLAGS="$CXXFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
@@ -1362,7 +1368,7 @@ $HAS_DEBUG \
 --without-iconv \
 --with-pdo-sqlite \
 --with-pdo-mysql \
---enable-pic \
+$HAS_PIC \
 --enable-phar \
 --enable-ctype \
 --enable-sockets \

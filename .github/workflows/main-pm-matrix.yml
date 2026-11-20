@@ -19,6 +19,11 @@ on:
         description: "Mark releases as pre-release"
         required: true
         type: boolean
+      runner:
+        description: "Windows runner image"
+        required: false
+        type: string
+        default: windows-2022
 
 env:
   MUSL_CROSS_MAKE_VERSION: b7b27ee2f37b5794658dce8a611f91feb456bf91
@@ -231,7 +236,7 @@ jobs:
 
   windows:
     name: Windows
-    runs-on: windows-2022
+    runs-on: ${{ inputs.runner }}
 
     steps:
       - uses: actions/checkout@v7

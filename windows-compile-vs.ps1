@@ -22,7 +22,7 @@ $PHP_YAML_VER="a7a3b8680b8fbf0895fd63371a0ffc1305b1a5b8"
 $PHP_CHUNKUTILS2_VER="0.3.6"
 $PHP_IGBINARY_VER="3.2.16"
 $PHP_LEVELDB_VER="0.3.1"
-$PHP_CRYPTO_VER="3815c15ef7011362a4ebf581101885fd5deef92e" #release not tagged
+$PHP_CRYPTO_VER="c4ae4bd3aece7f1cceee72199d98d1011595e62e" #release not tagged
 $PHP_RECURSIONGUARD_VER="0.1.1"
 $PHP_MORTON_VER="0.1.3"
 $PHP_LIBDEFLATE_VER="0.2.2"
@@ -537,7 +537,7 @@ function download-php-extensions {
 
     write-library "php-ext crypto" $PHP_CRYPTO_VER
     write-download
-    (& cmd.exe /c "git clone https://github.com/alvin0319/php-crypto.git crypto 2>&1") >> $log_file
+    (& cmd.exe /c "git clone https://github.com/axolotl-pm/php-crypto.git crypto 2>&1") >> $log_file
     Push-Location crypto
     write-status "preparing"
     (& cmd.exe /c "git checkout $PHP_CRYPTO_VER 2>&1") >> $log_file

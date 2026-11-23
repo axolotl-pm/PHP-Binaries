@@ -32,7 +32,7 @@ EXT_LEVELDB_VERSION="0.3.1"
 EXT_CHUNKUTILS2_VERSION="0.3.6"
 EXT_XDEBUG_VERSION="3.5.0"
 EXT_IGBINARY_VERSION="3.2.16"
-EXT_CRYPTO_VERSION="3815c15ef7011362a4ebf581101885fd5deef92e" #release not tagged
+EXT_CRYPTO_VERSION="c4ae4bd3aece7f1cceee72199d98d1011595e62e" #release not tagged
 EXT_RECURSIONGUARD_VERSION="0.1.1"
 EXT_LIBDEFLATE_VERSION="0.2.2"
 EXT_MORTON_VERSION="0.1.3"
@@ -1199,7 +1199,7 @@ get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "axolotl-pm" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
-git clone https://github.com/alvin0319/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
+git clone https://github.com/axolotl-pm/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR/php/ext/crypto"
 git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
 git submodule update --init --recursive >> "$DIR/install.log" 2>&1

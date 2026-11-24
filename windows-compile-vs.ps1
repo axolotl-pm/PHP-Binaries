@@ -3,7 +3,7 @@ $ProgressPreference="SilentlyContinue"
 
 # Entries may be "version@git-ref" to build from a ref instead of the php-<version> tag.
 # 8.1 is EOL, no tag exists for the CVE-2026-109618/109619 fix
-$PHP_VERSIONS=@("8.1.34@1d7dec178a094e6e75b229ce22754045f8c6070a", "8.2.36", "8.3.37", "8.4.28", "8.5.13")
+$PHP_VERSIONS=@("8.1.34@1d7dec178a094e6e75b229ce22754045f8c6070a", "8.2.36", "8.3.37", "8.4.28", "8.5.13", "8.6.0")
 
 $PHP_SDK_VER="2.4.0"
 $ARCH="x64"
@@ -17,22 +17,24 @@ $LEVELDB_MCPE_VER="1c7564468b41610da4f498430e795ca4de0931ff" #release not tagged
 $LIBDEFLATE_VER="96836d7d9d10e3e0d53e6edb54eb908514e336c4" #1.24 - see above note about "v" prefixes
 $LIBDATACHANNEL_VER="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
-$PHP_PMMPTHREAD_VER="6.3.0"
-$PHP_YAML_VER="2.3.0"
-$PHP_CHUNKUTILS2_VER="0.3.5"
+$PHP_PMMPTHREAD_VER="6.3.1"
+$PHP_YAML_VER="a7a3b8680b8fbf0895fd63371a0ffc1305b1a5b8"
+$PHP_CHUNKUTILS2_VER="0.3.6"
 $PHP_IGBINARY_VER="3.2.16"
-$PHP_LEVELDB_VER="88071eb1b1eae96af043229104b9d813f7cbe40c" #release not tagged
-$PHP_CRYPTO_VER="999b3c7edbc7f8ca4fdeb0bb4bbae488ad0daf07" #release not tagged
-$PHP_RECURSIONGUARD_VER="0.1.0"
-$PHP_MORTON_VER="0.1.2"
-$PHP_LIBDEFLATE_VER="0.2.1"
-$PHP_XXHASH_VER="0.2.0"
+$PHP_LEVELDB_VER="0.3.1"
+$PHP_CRYPTO_VER="c4ae4bd3aece7f1cceee72199d98d1011595e62e" #release not tagged
+$PHP_RECURSIONGUARD_VER="0.1.1"
+$PHP_MORTON_VER="0.1.3"
+$PHP_LIBDEFLATE_VER="0.2.2"
+$PHP_XXHASH_VER="0.2.1"
 $PHP_XDEBUG_VER="3.5.0"
-$PHP_ARRAYDEBUG_VER="0.2.1"
-$PHP_ENCODING_VER="1.0.0"
+$PHP_ARRAYDEBUG_VER="0.2.2"
+$PHP_ENCODING_VER="1.0.1"
 $PHP_WEBRTC_VER="0.3.1"
 
 $PHP_IGBINARY_VER_PHP85="3.2.17RC1"
+$PHP_IGBINARY_VER_PHP86="2b1f5d62e3037b07c2a46499ac32091cdb41fb40"
+$PHP_XDEBUG_VER_PHP86="3.6.0alpha1"
 
 function pm-echo {
     param ([string] $message)
@@ -205,10 +207,15 @@ $SDL_TOOLSET_FLAG=""
 $CMAKE_TOOLSET_FLAG=""
 
 $PHP_VERSION_ID = php-version-id $PHP_VER
-if ($PHP_VERSION_ID -ge 80400) {
-    $VC_VER="vs17"
+if ($PHP_VERSION_ID -ge 80600) {
+    $VC_VER="vs18"
+    $CMAKE_TARGET="Visual Studio 18 2026"
     $SDK_TOOLSET_FLAG=""
     $CMAKE_TOOLSET_FLAG=""
+} elseif ($PHP_VERSION_ID -ge 80400) {
+    $VC_VER="vs17"
+    $SDK_TOOLSET_FLAG="-s 14.44"
+    $CMAKE_TOOLSET_FLAG="-T v143"
 } else {
     #technically it's fine to build <8.4 with vs17, but this would make the binaries ABI-incompatible with community prebuilt extensions
     $VC_VER="vs16"
@@ -220,6 +227,10 @@ pm-echo "Selected PHP $PHP_VER ($PHP_VERSION_ID), SDK target $VC_VER ($SDK_TOOLS
 
 if ($PHP_VERSION_ID -ge 80500) {
     $PHP_IGBINARY_VER=$PHP_IGBINARY_VER_PHP85
+}
+if ($PHP_VERSION_ID -ge 80600) {
+    $PHP_IGBINARY_VER=$PHP_IGBINARY_VER_PHP86
+    $PHP_XDEBUG_VER=$PHP_XDEBUG_VER_PHP86
 }
 $PHP_JIT_ENABLE_ARG="no"
 if ($PHP_VERSION_ID -ge 80400 -or $env:PHP_JIT_SUPPORT -eq 1) {
@@ -364,6 +375,7 @@ function build-yaml {
         -DCMAKE_PREFIX_PATH=`"$DEPS_DIR`"^`
         -DCMAKE_INSTALL_PREFIX=`"$DEPS_DIR`"^`
         -DBUILD_SHARED_LIBS=ON^`
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5^`
         `"$pwd`" || exit 1"
     write-compile
     sdk-command "msbuild ALL_BUILD.vcxproj /p:Configuration=$MSBUILD_CONFIGURATION /m || exit 1"
@@ -509,23 +521,23 @@ function get-github-extension {
 
 function download-php-extensions {
     Push-Location "$SOURCES_PATH\ext" >> $log_file 2>&1
-    get-github-extension "pmmpthread" $PHP_PMMPTHREAD_VER "pmmp" "ext-pmmpthread"
+    get-github-extension "pmmpthread" $PHP_PMMPTHREAD_VER "axolotl-pm" "ext-pmmpthread"
     get-github-extension "yaml"                  $PHP_YAML_VER                  "php"      "pecl-file_formats-yaml"
-    get-github-extension "chunkutils2"           $PHP_CHUNKUTILS2_VER           "pmmp"     "ext-chunkutils2"
+    get-github-extension "chunkutils2"           $PHP_CHUNKUTILS2_VER           "axolotl-pm" "ext-chunkutils2"
     get-github-extension "igbinary"              $PHP_IGBINARY_VER              "igbinary" "igbinary"
-    get-github-extension "leveldb"               $PHP_LEVELDB_VER               "pmmp"     "php-leveldb"
-    get-github-extension "recursionguard"        $PHP_RECURSIONGUARD_VER        "pmmp"     "ext-recursionguard"
-    get-github-extension "morton"                $PHP_MORTON_VER                "pmmp"     "ext-morton"
-    get-github-extension "libdeflate"            $PHP_LIBDEFLATE_VER            "pmmp"     "ext-libdeflate"
-    get-github-extension "xxhash"                $PHP_XXHASH_VER                "pmmp"     "ext-xxhash"
+    get-github-extension "leveldb"               $PHP_LEVELDB_VER               "axolotl-pm" "php-leveldb"
+    get-github-extension "recursionguard"        $PHP_RECURSIONGUARD_VER        "axolotl-pm" "ext-recursionguard"
+    get-github-extension "morton"                $PHP_MORTON_VER                "axolotl-pm" "ext-morton"
+    get-github-extension "libdeflate"            $PHP_LIBDEFLATE_VER            "axolotl-pm" "ext-libdeflate"
+    get-github-extension "xxhash"                $PHP_XXHASH_VER                "axolotl-pm" "ext-xxhash"
     get-github-extension "xdebug"                $PHP_XDEBUG_VER                "xdebug"   "xdebug"
-    get-github-extension "arraydebug"            $PHP_ARRAYDEBUG_VER            "pmmp"     "ext-arraydebug"
-    get-github-extension "encoding"              $PHP_ENCODING_VER              "pmmp"     "ext-encoding"
+    get-github-extension "arraydebug"            $PHP_ARRAYDEBUG_VER            "axolotl-pm" "ext-arraydebug"
+    get-github-extension "encoding"              $PHP_ENCODING_VER              "axolotl-pm" "ext-encoding"
     get-github-extension "webrtc"                $PHP_WEBRTC_VER                "axolotl-pm" "ext-webrtc"
 
     write-library "php-ext crypto" $PHP_CRYPTO_VER
     write-download
-    (& cmd.exe /c "git clone https://github.com/bukka/php-crypto.git crypto 2>&1") >> $log_file
+    (& cmd.exe /c "git clone https://github.com/axolotl-pm/php-crypto.git crypto 2>&1") >> $log_file
     Push-Location crypto
     write-status "preparing"
     (& cmd.exe /c "git checkout $PHP_CRYPTO_VER 2>&1") >> $log_file

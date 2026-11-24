@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #### Entries may be "version@git-ref" to build from a ref instead of the php-<version> tag.
 #### 8.1 is EOL, no tag exists for the CVE-2026-109618/109619 fix
-PHP_VERSIONS=("8.1.34@1d7dec178a094e6e75b229ce22754045f8c6070a" "8.2.36" "8.3.37" "8.4.28" "8.5.13")
+PHP_VERSIONS=("8.1.34@1d7dec178a094e6e75b229ce22754045f8c6070a" "8.2.36" "8.3.37" "8.4.28" "8.5.13" "8.6.0")
 
 #### NOTE: Tags with "v" prefixes behave weirdly in the GitHub API. They'll be stripped in some places but not others.
 #### Use commit hashes to avoid this.
@@ -26,22 +26,24 @@ SQLITE3_VERSION="3510100" #3.51.1
 LIBDEFLATE_VERSION="c8c56a20f8f621e6a966b716b31f1dedab6a41e3" #1.25 - see above note about "v" prefixes
 LIBDATACHANNEL_VERSION="443f6934d9007eb7076ab7825ba330f355fcbead" #v0.24.5 - see above note about "v" prefixes
 
-EXT_PMMPTHREAD_VERSION="6.3.0"
-EXT_YAML_VERSION="2.3.0"
-EXT_LEVELDB_VERSION="88071eb1b1eae96af043229104b9d813f7cbe40c" #release not tagged
-EXT_CHUNKUTILS2_VERSION="0.3.5"
+EXT_PMMPTHREAD_VERSION="6.3.1"
+EXT_YAML_VERSION="a7a3b8680b8fbf0895fd63371a0ffc1305b1a5b8"
+EXT_LEVELDB_VERSION="0.3.1"
+EXT_CHUNKUTILS2_VERSION="0.3.6"
 EXT_XDEBUG_VERSION="3.5.0"
 EXT_IGBINARY_VERSION="3.2.16"
-EXT_CRYPTO_VERSION="999b3c7edbc7f8ca4fdeb0bb4bbae488ad0daf07" #release not tagged
-EXT_RECURSIONGUARD_VERSION="0.1.0"
-EXT_LIBDEFLATE_VERSION="0.2.1"
-EXT_MORTON_VERSION="0.1.2"
-EXT_XXHASH_VERSION="0.2.0"
-EXT_ARRAYDEBUG_VERSION="0.2.1"
-EXT_ENCODING_VERSION="1.0.0"
+EXT_CRYPTO_VERSION="c4ae4bd3aece7f1cceee72199d98d1011595e62e" #release not tagged
+EXT_RECURSIONGUARD_VERSION="0.1.1"
+EXT_LIBDEFLATE_VERSION="0.2.2"
+EXT_MORTON_VERSION="0.1.3"
+EXT_XXHASH_VERSION="0.2.1"
+EXT_ARRAYDEBUG_VERSION="0.2.2"
+EXT_ENCODING_VERSION="1.0.1"
 EXT_WEBRTC_VERSION="0.3.1"
 
 EXT_IGBINARY_VERSION_PHP85="3.2.17RC1"
+EXT_IGBINARY_VERSION_PHP86="2b1f5d62e3037b07c2a46499ac32091cdb41fb40"
+EXT_XDEBUG_VERSION_PHP86="3.6.0alpha1"
 
 function write_out {
 	echo "[$1] $2"
@@ -324,6 +326,10 @@ write_out "opt" "Selected PHP $PHP_VERSION ($PHP_VERSION_ID)"
 
 if [ $PHP_VERSION_ID -ge 80500 ]; then
   EXT_IGBINARY_VERSION="$EXT_IGBINARY_VERSION_PHP85"
+fi
+if [ $PHP_VERSION_ID -ge 80600 ]; then
+  EXT_IGBINARY_VERSION="$EXT_IGBINARY_VERSION_PHP86"
+  EXT_XDEBUG_VERSION="$EXT_XDEBUG_VERSION_PHP86"
 fi
 if [ $PHP_VERSION_ID -ge 80400 ]; then
   HAVE_OPCACHE_JIT="yes"
@@ -1182,7 +1188,7 @@ function get_pecl_extension {
 cd "$BUILD_DIR/php"
 write_out "PHP" "Downloading additional extensions..."
 
-get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
+get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "axolotl-pm" "ext-pmmpthread"
 
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
@@ -1190,29 +1196,29 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
-get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
+get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "axolotl-pm" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
-git clone https://github.com/bukka/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
+git clone https://github.com/axolotl-pm/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR/php/ext/crypto"
 git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
 git submodule update --init --recursive >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 write_done
 
-get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
+get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "axolotl-pm" "php-leveldb"
 
-get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
+get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "axolotl-pm" "ext-chunkutils2"
 
-get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
+get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "axolotl-pm" "ext-libdeflate"
 
-get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
+get_github_extension "morton" "$EXT_MORTON_VERSION" "axolotl-pm" "ext-morton"
 
-get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
+get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "axolotl-pm" "ext-xxhash"
 
-get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "pmmp" "ext-arraydebug"
+get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "axolotl-pm" "ext-arraydebug"
 
-get_github_extension "encoding" "$EXT_ENCODING_VERSION" "pmmp" "ext-encoding"
+get_github_extension "encoding" "$EXT_ENCODING_VERSION" "axolotl-pm" "ext-encoding"
 
 get_github_extension "webrtc" "$EXT_WEBRTC_VERSION" "axolotl-pm" "ext-webrtc"
 
@@ -1315,6 +1321,12 @@ else
 	HAS_DEBUG="--disable-debug"
 fi
 
+if [ $PHP_VERSION_ID -ge 80600 ]; then
+	HAS_PIC="--enable-pic"
+else
+	HAS_PIC="--with-pic"
+fi
+
 if [ "$FSANITIZE_OPTIONS" != "" ]; then
 	CFLAGS="$CFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
 	CXXFLAGS="$CXXFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
@@ -1356,7 +1368,7 @@ $HAS_DEBUG \
 --without-iconv \
 --with-pdo-sqlite \
 --with-pdo-mysql \
---with-pic \
+$HAS_PIC \
 --enable-phar \
 --enable-ctype \
 --enable-sockets \

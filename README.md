@@ -8,6 +8,7 @@
 - [PM5 PHP 8.3](https://github.com/axolotl-pm/PHP-Binaries/releases/tag/pm5-php-8.3-latest) (Deprecated)
 - [PM5 PHP 8.4](https://github.com/axolotl-pm/PHP-Binaries/releases/tag/pm5-php-8.4-latest) (default for PM 5.0+)
 - [PM5 PHP 8.5](https://github.com/axolotl-pm/PHP-Binaries/releases/tag/pm5-php-8.5-latest)
+- [PM5 PHP 8.6](https://github.com/axolotl-pm/PHP-Binaries/releases/tag/pm5-php-8.6-latest) (Experimental!)
 
 ### Legacy binaries, no longer updated
 - [PM4 PHP 8.0](https://github.com/axolotl-pm/PHP-Binaries/releases/tag/pm4-php-8.0-latest) (default for PM 4.0+)
